@@ -36,7 +36,12 @@ func AddBook(c *fiber.Ctx) error {
 	}
 
 	db := database.DBConn
-	db.Create(&book)
+	err := db.Create(&book)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error.Error(),
+		})
+	}
 	return c.JSON(book)
 }
 
