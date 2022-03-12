@@ -7,23 +7,23 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func GetBooks(c *fiber.Ctx) error {
+func GetRoles(c *fiber.Ctx) error {
 	db := database.DBConn
-	var books []models.Book
+	var books []models.Role
 	db.Find(&books)
 	return c.JSON(books)
 }
 
-func GetBook(c *fiber.Ctx) error {
+func GetRole(c *fiber.Ctx) error {
 	id := c.Params("id")
 	db := database.DBConn
-	var book models.Book
+	var book models.Role
 	db.First(&book, id)
 	return c.JSON(book)
 }
 
-func AddBook(c *fiber.Ctx) error {
-	var book models.Book
+func AddRole(c *fiber.Ctx) error {
+	var book models.Role
 	if err := c.BodyParser(&book); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": err.Error(),
@@ -31,12 +31,14 @@ func AddBook(c *fiber.Ctx) error {
 	}
 
 	errors := utils.ValidateStruct(book)
+
 	if errors != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(errors)
 	}
 
 	db := database.DBConn
 	err := db.Create(&book)
+
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": err.Error.Error(),
@@ -45,9 +47,9 @@ func AddBook(c *fiber.Ctx) error {
 	return c.JSON(book)
 }
 
-func UpdateBook(c *fiber.Ctx) error {
+func UpdateRole(c *fiber.Ctx) error {
 	id := c.Params("id")
-	var book models.Book
+	var book models.Role
 	if err := c.BodyParser(&book); err != nil {
 		return c.Status(503).JSON(fiber.Map{
 			"error": err.Error(),
@@ -56,22 +58,22 @@ func UpdateBook(c *fiber.Ctx) error {
 	db := database.DBConn
 	db.Model(&book).Where("id = ?", id).Updates(book)
 	return c.JSON(fiber.Map{
-		"message": "Book updated",
+		"message": "Role updated",
 	})
 }
 
-func DeleteBook(c *fiber.Ctx) error {
+func DeleteRole(c *fiber.Ctx) error {
 	id := c.Params("id")
 	db := database.DBConn
-	var book models.Book
+	var book models.Role
 	db.First(&book, id)
 	if book.ID == 0 {
 		return c.Status(404).JSON(fiber.Map{
-			"error": "Book not found",
+			"error": "Role not found",
 		})
 	}
 	db.Delete(&book)
 	return c.JSON(fiber.Map{
-		"message": "Book deleted",
+		"message": "Role deleted",
 	})
 }

@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/fabrv/watchman-server/controllers"
+	"github.com/fabrv/watchman-server/routes"
+
 	"github.com/fabrv/watchman-server/database"
 	"github.com/fabrv/watchman-server/models"
 	"github.com/gofiber/fiber/v2"
@@ -15,7 +16,7 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-func getenv(key, fallback string) string {
+func getEnv(key, fallback string) string {
 	value := os.Getenv(key)
 	if len(value) == 0 {
 		return fallback
@@ -25,44 +26,37 @@ func getenv(key, fallback string) string {
 
 func initDatabase() {
 	var err error
-	database.DBConn, err = gorm.Open("postgres", getenv("DATABASE_URL", "host=localhost port=5432 user=postgres dbname=watchman password=password sslmode=disable"))
+	database.DBConn, err = gorm.Open("postgres", getEnv("DATABASE_URL", "host=localhost port=5432 user=postgres dbname=watchman password=password sslmode=disable"))
 
 	if err != nil {
 		panic(err)
 	}
 	fmt.Println("Connected to database")
 
-	database.DBConn.AutoMigrate(&models.Book{})
+	database.DBConn.AutoMigrate(&models.User{}, &models.Project{}, &models.Team{}, &models.Role{})
 	fmt.Println("Database migrated")
-}
-
-func setupRoutes(app *fiber.App) {
-	var baseRoute = "/api/v1"
-	app.Get(baseRoute+"/books", controllers.GetBooks)
-	app.Get(baseRoute+"/books/:id", controllers.GetBook)
-	app.Post(baseRoute+"/books", controllers.AddBook)
-	app.Put(baseRoute+"/books/:id", controllers.UpdateBook)
-	app.Delete(baseRoute+"/books/:id", controllers.DeleteBook)
-
-	app.Use(func(c *fiber.Ctx) error {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"code":    404,
-			"message": "404: Not Found",
-		})
-	})
 }
 
 func main() {
 	app := fiber.New()
 	initDatabase()
-	defer database.DBConn.Close()
+	defer func(DBConn *gorm.DB) {
+		err := DBConn.Close()
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+	}(database.DBConn)
 
 	app.Use(cors.New(cors.Config{
-		AllowOrigins: "*", // comma string format e.g. "localhost, nikschaefer.tech"
+		AllowOrigins: "*",
 		AllowHeaders: "Origin, Content-Type, Accept",
 	}))
 	app.Use(logger.New())
-	setupRoutes(app)
+	routes.SetupRoutes(app)
 
-	app.Listen(":" + getenv("PORT", "3000"))
+	err := app.Listen(":" + getEnv("PORT", "3000"))
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
 }
