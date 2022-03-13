@@ -7,73 +7,73 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func GetRoles(c *fiber.Ctx) error {
+func GetProjects(c *fiber.Ctx) error {
 	db := database.DBConn
-	var roles []models.Role
-	db.Find(&roles)
-	return c.JSON(roles)
+	var projects []models.Project
+	db.Find(&projects)
+	return c.JSON(projects)
 }
 
-func GetRole(c *fiber.Ctx) error {
+func GetProject(c *fiber.Ctx) error {
 	id := c.Params("id")
 	db := database.DBConn
-	var role models.Role
-	db.First(&role, id)
-	return c.JSON(role)
+	var project models.Project
+	db.First(&project, id)
+	return c.JSON(project)
 }
 
-func AddRole(c *fiber.Ctx) error {
-	var role models.Role
-	if err := c.BodyParser(&role); err != nil {
+func AddProject(c *fiber.Ctx) error {
+	var project models.Project
+	if err := c.BodyParser(&project); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": err.Error(),
 		})
 	}
 
-	errors := utils.ValidateStruct(role)
+	errors := utils.ValidateStruct(project)
 
 	if errors != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(errors)
 	}
 
 	db := database.DBConn
-	status := db.Create(&role)
+	status := db.Create(&project)
 
 	if status.Error != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": status.Error.Error(),
 		})
 	}
-	return c.JSON(role)
+	return c.JSON(project)
 }
 
-func UpdateRole(c *fiber.Ctx) error {
+func UpdateProject(c *fiber.Ctx) error {
 	id := c.Params("id")
-	var role models.Role
-	if err := c.BodyParser(&role); err != nil {
+	var project models.Project
+	if err := c.BodyParser(&project); err != nil {
 		return c.Status(503).JSON(fiber.Map{
 			"error": err.Error(),
 		})
 	}
 	db := database.DBConn
-	db.Model(&role).Where("id = ?", id).Updates(role)
+	db.Model(&project).Where("id = ?", id).Updates(project)
 	return c.JSON(fiber.Map{
-		"message": "Role updated",
+		"message": "Project updated",
 	})
 }
 
-func DeleteRole(c *fiber.Ctx) error {
+func DeleteProject(c *fiber.Ctx) error {
 	id := c.Params("id")
 	db := database.DBConn
-	var role models.Role
-	db.First(&role, id)
-	if role.ID == 0 {
+	var project models.Project
+	db.First(&project, id)
+	if project.ID == 0 {
 		return c.Status(404).JSON(fiber.Map{
-			"error": "Role not found",
+			"error": "Project not found",
 		})
 	}
-	db.Delete(&role)
+	db.Delete(&project)
 	return c.JSON(fiber.Map{
-		"message": "Role deleted",
+		"message": "Project deleted",
 	})
 }

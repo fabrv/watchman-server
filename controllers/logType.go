@@ -7,73 +7,73 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func GetRoles(c *fiber.Ctx) error {
+func GetLogTypes(c *fiber.Ctx) error {
 	db := database.DBConn
-	var roles []models.Role
-	db.Find(&roles)
-	return c.JSON(roles)
+	var logTypes []models.LogType
+	db.Find(&logTypes)
+	return c.JSON(logTypes)
 }
 
-func GetRole(c *fiber.Ctx) error {
+func GetLogType(c *fiber.Ctx) error {
 	id := c.Params("id")
 	db := database.DBConn
-	var role models.Role
-	db.First(&role, id)
-	return c.JSON(role)
+	var logType models.LogType
+	db.First(&logType, id)
+	return c.JSON(logType)
 }
 
-func AddRole(c *fiber.Ctx) error {
-	var role models.Role
-	if err := c.BodyParser(&role); err != nil {
+func AddLogType(c *fiber.Ctx) error {
+	var logType models.LogType
+	if err := c.BodyParser(&logType); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": err.Error(),
 		})
 	}
 
-	errors := utils.ValidateStruct(role)
+	errors := utils.ValidateStruct(logType)
 
 	if errors != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(errors)
 	}
 
 	db := database.DBConn
-	status := db.Create(&role)
+	status := db.Create(&logType)
 
 	if status.Error != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": status.Error.Error(),
 		})
 	}
-	return c.JSON(role)
+	return c.JSON(logType)
 }
 
-func UpdateRole(c *fiber.Ctx) error {
+func UpdateLogType(c *fiber.Ctx) error {
 	id := c.Params("id")
-	var role models.Role
-	if err := c.BodyParser(&role); err != nil {
+	var logType models.LogType
+	if err := c.BodyParser(&logType); err != nil {
 		return c.Status(503).JSON(fiber.Map{
 			"error": err.Error(),
 		})
 	}
 	db := database.DBConn
-	db.Model(&role).Where("id = ?", id).Updates(role)
+	db.Model(&logType).Where("id = ?", id).Updates(logType)
 	return c.JSON(fiber.Map{
-		"message": "Role updated",
+		"message": "LogType updated",
 	})
 }
 
-func DeleteRole(c *fiber.Ctx) error {
+func DeleteLogType(c *fiber.Ctx) error {
 	id := c.Params("id")
 	db := database.DBConn
-	var role models.Role
-	db.First(&role, id)
-	if role.ID == 0 {
+	var logType models.LogType
+	db.First(&logType, id)
+	if logType.ID == 0 {
 		return c.Status(404).JSON(fiber.Map{
-			"error": "Role not found",
+			"error": "LogType not found",
 		})
 	}
-	db.Delete(&role)
+	db.Delete(&logType)
 	return c.JSON(fiber.Map{
-		"message": "Role deleted",
+		"message": "LogType deleted",
 	})
 }
