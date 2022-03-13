@@ -24,6 +24,6 @@ func InitDatabase() {
 	}
 	fmt.Println("Connected to database")
 
-	DBConn.AutoMigrate(&models.LogType{}, &models.Project{}, &models.Team{}, &models.Role{}, &models.User{})
+	DBConn.AutoMigrate(&models.LogType{}, &models.Project{}, &models.Team{}, &models.Role{}, &models.User{}, &models.TimeLog{})
 	fmt.Println("Database migrated")
 }

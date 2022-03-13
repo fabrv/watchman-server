@@ -43,6 +43,13 @@ func SetupRoutes(app *fiber.App) {
 	app.Put(baseRoute+"/users/:id", controllers.UpdateUser)
 	app.Delete(baseRoute+"/users/:id", controllers.DeleteUser)
 
+	// Time Log routes
+	app.Get(baseRoute+"/time-logs", controllers.GetTimeLogs)
+	app.Get(baseRoute+"/time-logs/:id", controllers.GetTimeLog)
+	app.Post(baseRoute+"/time-logs", controllers.AddTimeLog)
+	app.Put(baseRoute+"/time-logs/:id", controllers.UpdateTimeLog)
+	app.Delete(baseRoute+"/time-logs/:id", controllers.DeleteTimeLog)
+
 	app.Use(func(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"code":    404,

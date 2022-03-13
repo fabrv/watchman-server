@@ -21,7 +21,7 @@ func GetUser(c *fiber.Ctx) error {
 	id := c.Params("id")
 	db := database.DBConn
 	var user models.User
-	db.First(&user, id)
+	db.Preload("Role").First(&user, id)
 	return c.JSON(user)
 }
 
