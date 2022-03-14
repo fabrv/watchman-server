@@ -12,7 +12,8 @@ import (
 func GetUsers(c *fiber.Ctx) error {
 	db := database.DBConn
 	var users []models.User
-	db.Preload("Role").Find(&users)
+	// Preload roles and select only id, name, role_id and name
+	db.Preload("Role").Select("id, name, email, role_id").Find(&users)
 
 	return c.JSON(users)
 }
@@ -21,7 +22,7 @@ func GetUser(c *fiber.Ctx) error {
 	id := c.Params("id")
 	db := database.DBConn
 	var user models.User
-	db.Preload("Role").First(&user, id)
+	db.Preload("Role").Select("id, name, email, role_id").First(&user, id)
 	return c.JSON(user)
 }
 

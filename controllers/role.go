@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"strings"
+
 	"github.com/fabrv/watchman-server/database"
 	"github.com/fabrv/watchman-server/models"
 	"github.com/fabrv/watchman-server/utils"
@@ -9,8 +11,31 @@ import (
 
 func GetRoles(c *fiber.Ctx) error {
 	db := database.DBConn
+
+	limit := c.Query("limit")
+	offset := c.Query("offset")
+	name := c.Query("name")
+	ids := strings.Split(c.Query("ids"), ",")
+
+	if limit == "" {
+		limit = "10"
+	}
+	if offset == "" {
+		offset = "0"
+	}
+
 	var roles []models.Role
-	db.Find(&roles)
+	query := db.Limit(limit).Offset(offset)
+
+	if ids[0] != "" {
+		query = query.Where("id IN (?)", ids)
+	}
+
+	if name != "" {
+		query = query.Where("name LIKE ?", "%"+name+"%")
+	}
+
+	query.Find(&roles)
 	return c.JSON(roles)
 }
 

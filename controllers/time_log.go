@@ -11,7 +11,18 @@ func GetTimeLogs(c *fiber.Ctx) error {
 	db := database.DBConn
 	var timeLogs []models.TimeLog
 
-	db.Preload("LogType").Preload("Project").Preload("Team").Preload("User").Find(&timeLogs)
+	limit := c.Query("limit")
+	offset := c.Query("offset")
+
+	if limit == "" {
+		limit = "10"
+	}
+	if offset == "" {
+		offset = "0"
+	}
+
+	query := db.Limit(limit).Offset(offset)
+	query.Preload("LogType").Preload("Project").Preload("Team").Find(&timeLogs)
 
 	return c.JSON(timeLogs)
 }
