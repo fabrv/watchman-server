@@ -1,8 +1,40 @@
 basePath: /api/v1
 definitions:
+  models.Error:
+    properties:
+      error:
+        type: string
+    type: object
   models.Message:
     properties:
       message:
+        type: string
+    type: object
+  models.ProjectPayload:
+    properties:
+      description:
+        maxLength: 100
+        minLength: 3
+        type: string
+      name:
+        maxLength: 255
+        minLength: 1
+        type: string
+    required:
+    - description
+    - name
+    type: object
+  models.ProjectResponse:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      updated_at:
         type: string
     type: object
   models.RolePayload:
@@ -35,6 +67,124 @@ definitions:
 info:
   contact: {}
 paths:
+  /projects:
+    get:
+      description: Get all projects
+      parameters:
+      - description: Limit
+        in: query
+        name: limit
+        type: number
+      - description: Offset
+        in: query
+        name: offset
+        type: number
+      - description: Name
+        in: query
+        name: name
+        type: string
+      - description: IDs
+        in: query
+        name: ids
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.ProjectResponse'
+            type: array
+      summary: Get All Projects
+      tags:
+      - Projects
+    post:
+      consumes:
+      - application/json
+      description: Create project
+      parameters:
+      - description: Project
+        in: body
+        name: project
+        required: true
+        schema:
+          $ref: '#/definitions/models.ProjectPayload'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ProjectResponse'
+      summary: Create Project
+      tags:
+      - Projects
+  /projects/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete project
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ProjectResponse'
+      summary: Delete Project
+      tags:
+      - Projects
+    get:
+      description: Get project
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ProjectResponse'
+      summary: Get Project
+      tags:
+      - Projects
+    put:
+      consumes:
+      - application/json
+      description: Update project
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Project
+        in: body
+        name: project
+        required: true
+        schema:
+          $ref: '#/definitions/models.ProjectPayload'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ProjectResponse'
+      summary: Update Project
+      tags:
+      - Projects
   /roles:
     get:
       description: Get all roles
@@ -89,6 +239,28 @@ paths:
       tags:
       - Roles
   /roles/{id}:
+    delete:
+      description: Delete role
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Message'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.Error'
+      summary: Delete role
+      tags:
+      - Roles
     get:
       description: Get role
       parameters:
