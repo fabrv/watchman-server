@@ -1,0 +1,136 @@
+basePath: /api/v1
+definitions:
+  models.Message:
+    properties:
+      message:
+        type: string
+    type: object
+  models.RolePayload:
+    properties:
+      description:
+        maxLength: 100
+        minLength: 3
+        type: string
+      name:
+        maxLength: 255
+        minLength: 1
+        type: string
+    required:
+    - description
+    - name
+    type: object
+  models.RoleResponse:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      updated_at:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /roles:
+    get:
+      description: Get all roles
+      parameters:
+      - description: Limit
+        in: query
+        name: limit
+        type: number
+      - description: Offset
+        in: query
+        name: offset
+        type: number
+      - description: Name
+        in: query
+        name: name
+        type: string
+      - description: IDs
+        in: query
+        name: ids
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.RoleResponse'
+            type: array
+      summary: Get all roles
+      tags:
+      - Roles
+    post:
+      consumes:
+      - application/json
+      description: Add role
+      parameters:
+      - description: Role
+        in: body
+        name: role
+        required: true
+        schema:
+          $ref: '#/definitions/models.RolePayload'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.RoleResponse'
+      summary: Add role
+      tags:
+      - Roles
+  /roles/{id}:
+    get:
+      description: Get role
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.RoleResponse'
+      summary: Get role
+      tags:
+      - Roles
+    put:
+      consumes:
+      - application/json
+      description: Update role
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Role
+        in: body
+        name: role
+        required: true
+        schema:
+          $ref: '#/definitions/models.RolePayload'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Message'
+      summary: Update role
+      tags:
+      - Roles
+swagger: "2.0"

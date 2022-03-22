@@ -9,6 +9,17 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+// Get Roles
+// @Summary Get all roles
+// @Description Get all roles
+// @Tags Roles
+// @Produce json
+// @Param limit query number false "Limit"
+// @Param offset query number false "Offset"
+// @Param name query string false "Name"
+// @Param ids query string false "IDs"
+// @Success 200 {array} models.RoleResponse
+// @Router /roles [get]
 func GetRoles(c *fiber.Ctx) error {
 	db := database.DBConn
 
@@ -36,19 +47,52 @@ func GetRoles(c *fiber.Ctx) error {
 	}
 
 	query.Find(&roles)
-	return c.JSON(roles)
+	var response []models.RoleResponse
+	for _, role := range roles {
+		response = append(response, models.RoleResponse{
+			ID:          role.ID,
+			Name:        role.Name,
+			Description: role.Description,
+			CreatedAt:   role.CreatedAt,
+			UpdatedAt:   role.UpdatedAt,
+		})
+	}
+	return c.JSON(response)
 }
 
+// Get Role
+// @Summary Get role
+// @Description Get role
+// @Tags Roles
+// @Produce json
+// @Param id path string true "ID"
+// @Success 200 {object} models.RoleResponse
+// @Router /roles/{id} [get]
 func GetRole(c *fiber.Ctx) error {
 	id := c.Params("id")
 	db := database.DBConn
 	var role models.Role
 	db.First(&role, id)
-	return c.JSON(role)
+	return c.JSON(models.RoleResponse{
+		ID:          role.ID,
+		Name:        role.Name,
+		Description: role.Description,
+		CreatedAt:   role.CreatedAt,
+		UpdatedAt:   role.UpdatedAt,
+	})
 }
 
+// Add Role
+// @Summary Add role
+// @Description Add role
+// @Tags Roles
+// @Accept json
+// @Produce json
+// @Param role body models.RolePayload true "Role"
+// @Success 200 {object} models.RoleResponse
+// @Router /roles [post]
 func AddRole(c *fiber.Ctx) error {
-	var role models.Role
+	var role models.RolePayload
 	if err := c.BodyParser(&role); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": err.Error(),
@@ -62,31 +106,72 @@ func AddRole(c *fiber.Ctx) error {
 	}
 
 	db := database.DBConn
-	status := db.Create(&role)
+	roleModel := models.Role{
+		Name:        role.Name,
+		Description: role.Description,
+	}
+	status := db.Create(&roleModel)
 
 	if status.Error != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": status.Error.Error(),
 		})
 	}
-	return c.JSON(role)
+	return c.JSON(models.RoleResponse{
+		ID:          roleModel.ID,
+		Name:        roleModel.Name,
+		Description: roleModel.Description,
+		CreatedAt:   roleModel.CreatedAt,
+		UpdatedAt:   roleModel.UpdatedAt,
+	})
 }
 
+// Update Role
+// @Summary Update role
+// @Description Update role
+// @Tags Roles
+// @Accept json
+// @Produce json
+// @Param id path string true "ID"
+// @Param role body models.RolePayload true "Role"
+// @Success 200 {object} models.Message
+// @Router /roles/{id} [put]
 func UpdateRole(c *fiber.Ctx) error {
 	id := c.Params("id")
-	var role models.Role
+	var role models.RolePayload
 	if err := c.BodyParser(&role); err != nil {
 		return c.Status(503).JSON(fiber.Map{
 			"error": err.Error(),
 		})
 	}
+
+	// Validate role
+	errors := utils.ValidateStruct(role)
+	if errors != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(errors)
+	}
+
+	roleModel := models.Role{
+		Name:        role.Name,
+		Description: role.Description,
+	}
+
 	db := database.DBConn
-	db.Model(&role).Where("id = ?", id).Updates(role)
+	db.Model(&roleModel).Where("id = ?", id).Updates(role)
 	return c.JSON(fiber.Map{
 		"message": "Role updated",
 	})
 }
 
+// Delete Role
+// @Summary Delete role
+// @Description Delete role
+// @Tags Roles
+// @Produce json
+// @Param id path string true "ID"
+// @Success 200 {object} models.Message
+// @Failure 404 {object} models.Error
+// @Router /roles/{id} [delete]
 func DeleteRole(c *fiber.Ctx) error {
 	id := c.Params("id")
 	db := database.DBConn

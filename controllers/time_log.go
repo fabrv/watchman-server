@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"strings"
+
 	"github.com/fabrv/watchman-server/database"
 	"github.com/fabrv/watchman-server/models"
 	"github.com/fabrv/watchman-server/utils"
@@ -13,6 +15,7 @@ func GetTimeLogs(c *fiber.Ctx) error {
 
 	limit := c.Query("limit")
 	offset := c.Query("offset")
+	userIds := strings.Split(c.Query("user_ids"), ",")
 
 	if limit == "" {
 		limit = "10"
@@ -22,6 +25,11 @@ func GetTimeLogs(c *fiber.Ctx) error {
 	}
 
 	query := db.Limit(limit).Offset(offset)
+
+	if userIds[0] != "" {
+		query = query.Where("user_id IN (?)", userIds)
+	}
+
 	query.Preload("LogType").Preload("Project").Preload("Team").Find(&timeLogs)
 
 	return c.JSON(timeLogs)
