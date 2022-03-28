@@ -151,14 +151,25 @@ func AddTeam(c *fiber.Ctx) error {
 // @Router /teams/{id} [put]
 func UpdateTeam(c *fiber.Ctx) error {
 	id := c.Params("id")
-	var team models.Team
+	var team models.TeamPayload
 	if err := c.BodyParser(&team); err != nil {
 		return c.Status(503).JSON(fiber.Map{
 			"error": err.Error(),
 		})
 	}
+
+	errors := utils.ValidateStruct(team)
+	if errors != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(errors)
+	}
+
 	db := database.DBConn
-	db.Model(&team).Where("id = ?", id).Updates(team)
+	teamModel := models.Team{
+		Name:        team.Name,
+		Description: team.Description,
+	}
+
+	db.Model(&teamModel).Where("id = ?", id).Updates(teamModel)
 	return c.JSON(fiber.Map{
 		"message": "Team updated",
 	})

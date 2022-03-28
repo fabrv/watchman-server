@@ -118,14 +118,26 @@ func AddUser(c *fiber.Ctx) error {
 // @Router /users/{id} [put]
 func UpdateUser(c *fiber.Ctx) error {
 	id := c.Params("id")
-	var user models.User
+	var user models.UserPayload
 	if err := c.BodyParser(&user); err != nil {
 		return c.Status(503).JSON(fiber.Map{
 			"error": err.Error(),
 		})
 	}
+
+	errors := utils.ValidateStruct(user)
+	if errors != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(errors)
+	}
+
 	db := database.DBConn
-	db.Model(&user).Where("id = ?", id).Updates(user)
+	userModel := models.User{
+		Name:     user.Name,
+		Email:    user.Email,
+		Password: user.Password,
+	}
+
+	db.Model(&userModel).Where("id = ?", id).Updates(userModel)
 	return c.JSON(fiber.Map{
 		"message": "User updated",
 	})
