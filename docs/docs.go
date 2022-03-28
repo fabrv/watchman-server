@@ -16,6 +16,165 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/log-types": {
+            "get": {
+                "description": "Get all LogTypes",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "LogTypes"
+                ],
+                "summary": "Get all LogTypes",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.LogTypeResponse"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new logType",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "LogTypes"
+                ],
+                "summary": "Create a new logType",
+                "parameters": [
+                    {
+                        "description": "LogType",
+                        "name": "log_type",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.LogTypePayload"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.LogTypeResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/log-types/{id}": {
+            "get": {
+                "description": "Get one logType",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "LogTypes"
+                ],
+                "summary": "Get one logType",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "LogType ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.LogTypeResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update a logType",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "LogTypes"
+                ],
+                "summary": "Update a logType",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "LogType ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "LogType",
+                        "name": "log_type",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.LogTypePayload"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.LogTypeResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete a logType",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "LogTypes"
+                ],
+                "summary": "Delete a logType",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "LogType ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.LogTypeResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/projects": {
             "get": {
                 "description": "Get all projects",
@@ -739,6 +898,45 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "error": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.LogTypePayload": {
+            "type": "object",
+            "required": [
+                "description",
+                "name"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 3
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 255,
+                    "minLength": 1
+                }
+            }
+        },
+        "models.LogTypeResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "updated_at": {
                     "type": "string"
                 }
             }

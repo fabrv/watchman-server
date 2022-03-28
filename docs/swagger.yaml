@@ -5,6 +5,33 @@ definitions:
       error:
         type: string
     type: object
+  models.LogTypePayload:
+    properties:
+      description:
+        maxLength: 100
+        minLength: 3
+        type: string
+      name:
+        maxLength: 255
+        minLength: 1
+        type: string
+    required:
+    - description
+    - name
+    type: object
+  models.LogTypeResponse:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      updated_at:
+        type: string
+    type: object
   models.MessageResponse:
     properties:
       message:
@@ -116,6 +143,111 @@ definitions:
 info:
   contact: {}
 paths:
+  /log-types:
+    get:
+      consumes:
+      - application/json
+      description: Get all LogTypes
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.LogTypeResponse'
+            type: array
+      summary: Get all LogTypes
+      tags:
+      - LogTypes
+    post:
+      consumes:
+      - application/json
+      description: Create a new logType
+      parameters:
+      - description: LogType
+        in: body
+        name: log_type
+        required: true
+        schema:
+          $ref: '#/definitions/models.LogTypePayload'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.LogTypeResponse'
+      summary: Create a new logType
+      tags:
+      - LogTypes
+  /log-types/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a logType
+      parameters:
+      - description: LogType ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.LogTypeResponse'
+      summary: Delete a logType
+      tags:
+      - LogTypes
+    get:
+      consumes:
+      - application/json
+      description: Get one logType
+      parameters:
+      - description: LogType ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.LogTypeResponse'
+      summary: Get one logType
+      tags:
+      - LogTypes
+    put:
+      consumes:
+      - application/json
+      description: Update a logType
+      parameters:
+      - description: LogType ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: LogType
+        in: body
+        name: log_type
+        required: true
+        schema:
+          $ref: '#/definitions/models.LogTypePayload'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.LogTypeResponse'
+      summary: Update a logType
+      tags:
+      - LogTypes
   /projects:
     get:
       description: Get all projects
