@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"strings"
+	"time"
 
 	"github.com/fabrv/watchman-server/database"
 	"github.com/fabrv/watchman-server/models"
@@ -9,6 +10,15 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+// GetTimeLogs returns all TimeLogs
+// @Summary Get all TimeLogs
+// @Description Get all TimeLogs
+// @Tags TimeLog
+// @Accept json
+// @Produce json
+// @Success 200 {array} models.TimeLogResponse
+// @Failure 500 {object} models.ErrorResponse
+// @Router /time-logs [get]
 func GetTimeLogs(c *fiber.Ctx) error {
 	db := database.DBConn
 	var timeLogs []models.TimeLog
@@ -30,11 +40,35 @@ func GetTimeLogs(c *fiber.Ctx) error {
 		query = query.Where("user_id IN (?)", userIds)
 	}
 
-	query.Preload("LogType").Preload("Project").Preload("Team").Find(&timeLogs)
+	query.Find(&timeLogs)
 
-	return c.JSON(timeLogs)
+	var timeLogsResponse []models.TimeLogResponse
+	for _, timeLog := range timeLogs {
+		timeLogsResponse = append(timeLogsResponse, models.TimeLogResponse{
+			ID:          timeLog.ID,
+			UserId:      timeLog.UserID,
+			LogTypeId:   timeLog.LogTypeID,
+			ProjectId:   timeLog.ProjectID,
+			TeamId:      timeLog.TeamID,
+			StartTime:   timeLog.StartTime,
+			EndTime:     timeLog.EndTime,
+			Description: timeLog.Description,
+		})
+	}
+
+	return c.JSON(timeLogsResponse)
 }
 
+// GetTimeLog returns a TimeLog
+// @Summary Get a TimeLog
+// @Description Get a TimeLog
+// @Tags TimeLog
+// @Accept json
+// @Produce json
+// @Param id path string true "TimeLog ID"
+// @Success 200 {object} models.TimeLogResponse
+// @Failure 500 {object} models.ErrorResponse
+// @Router /time-logs/{id} [get]
 func GetTimeLog(c *fiber.Ctx) error {
 	id := c.Params("id")
 	db := database.DBConn
@@ -43,6 +77,16 @@ func GetTimeLog(c *fiber.Ctx) error {
 	return c.JSON(timeLog)
 }
 
+// CreateTimeLog creates a new TimeLog
+// @Summary Create a new TimeLog
+// @Description Create a new TimeLog
+// @Tags TimeLog
+// @Accept json
+// @Produce json
+// @Param time_log body models.TimeLogPayload true "TimeLog"
+// @Success 200 {object} models.TimeLogResponse
+// @Failure 500 {object} models.ErrorResponse
+// @Router /time-logs [post]
 func AddTimeLog(c *fiber.Ctx) error {
 	var timeLogPayload models.TimeLogPayload
 	if err := c.BodyParser(&timeLogPayload); err != nil {
@@ -63,7 +107,6 @@ func AddTimeLog(c *fiber.Ctx) error {
 		TeamID:      timeLogPayload.TeamID,
 		LogTypeID:   timeLogPayload.LogTypeID,
 		StartTime:   timeLogPayload.StartTime,
-		EndTime:     timeLogPayload.EndTime,
 		Description: timeLogPayload.Description,
 	}
 
@@ -78,6 +121,17 @@ func AddTimeLog(c *fiber.Ctx) error {
 	return c.JSON(timeLogPayload)
 }
 
+// UpdateTimeLog updates a TimeLog
+// @Summary Update a TimeLog
+// @Description Update a TimeLog
+// @Tags TimeLog
+// @Accept json
+// @Produce json
+// @Param id path string true "TimeLog ID"
+// @Param time_log body models.TimeLogPayload true "TimeLog"
+// @Success 200 {object} models.MessageResponse
+// @Failure 500 {object} models.ErrorResponse
+// @Router /time-logs/{id} [put]
 func UpdateTimeLog(c *fiber.Ctx) error {
 	id := c.Params("id")
 	var timeLog models.TimeLog
@@ -93,6 +147,16 @@ func UpdateTimeLog(c *fiber.Ctx) error {
 	})
 }
 
+// DeleteTimeLog deletes a TimeLog
+// @Summary Delete a TimeLog
+// @Description Delete a TimeLog
+// @Tags TimeLog
+// @Accept json
+// @Produce json
+// @Param id path string true "TimeLog ID"
+// @Success 200 {object} models.MessageResponse
+// @Failure 500 {object} models.ErrorResponse
+// @Router /time-logs/{id} [delete]
 func DeleteTimeLog(c *fiber.Ctx) error {
 	id := c.Params("id")
 	db := database.DBConn
@@ -106,5 +170,32 @@ func DeleteTimeLog(c *fiber.Ctx) error {
 	db.Delete(&timeLog)
 	return c.JSON(fiber.Map{
 		"message": "TimeLog deleted",
+	})
+}
+
+// FinishTimeLog finishes a TimeLog
+// @Summary Finish a TimeLog
+// @Description Sets the end time of a TimeLog to the current time
+// @Tags TimeLog
+// @Accept json
+// @Produce json
+// @Param id path string true "TimeLog ID"
+// @Success 200 {object} models.MessageResponse
+// @Failure 500 {object} models.ErrorResponse
+// @Router /time-logs/{id}/finish [post]
+func FinishTimeLog(c *fiber.Ctx) error {
+	id := c.Params("id")
+	db := database.DBConn
+	var timeLog models.TimeLog
+	db.First(&timeLog, id)
+	if timeLog.ID == 0 {
+		return c.Status(404).JSON(fiber.Map{
+			"error": "TimeLog not found",
+		})
+	}
+	timeLog.EndTime = time.Now()
+	db.Save(&timeLog)
+	return c.JSON(fiber.Map{
+		"message": "TimeLog finished",
 	})
 }

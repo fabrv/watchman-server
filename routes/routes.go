@@ -49,6 +49,7 @@ func SetupRoutes(app *fiber.App) {
 	app.Post(baseRoute+"/time-logs", controllers.AddTimeLog)
 	app.Put(baseRoute+"/time-logs/:id", controllers.UpdateTimeLog)
 	app.Delete(baseRoute+"/time-logs/:id", controllers.DeleteTimeLog)
+	app.Post(baseRoute+"/time-logs/:id/finish", controllers.FinishTimeLog)
 
 	app.Use(func(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{

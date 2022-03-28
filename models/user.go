@@ -1,6 +1,10 @@
 package models
 
-import "github.com/jinzhu/gorm"
+import (
+	"time"
+
+	"github.com/jinzhu/gorm"
+)
 
 type UserPayload struct {
 	Name     string `json:"name" validate:"required,min=1,max=255"`
@@ -18,4 +22,14 @@ type User struct {
 	Role     Role      `json:"role"`
 	Projects []Project `json:"projects" gorm:"many2many:user_projects"`
 	Teams    []Team    `json:"teams" gorm:"many2many:user_teams"`
+}
+
+type UserResponse struct {
+	ID        uint      `json:"id"`
+	Name      string    `json:"name"`
+	Email     string    `json:"email"`
+	RoleID    uint      `json:"role_id"`
+	Role      Role      `json:"role"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }

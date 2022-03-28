@@ -50,7 +50,18 @@ func GetUsers(c *fiber.Ctx) error {
 	// Preload roles and select only id, name, role_id and name
 	query.Preload("Role").Select("id, name, email, role_id").Find(&users)
 
-	return c.JSON(users)
+	var usersResponse []models.UserResponse
+	for _, user := range users {
+		usersResponse = append(usersResponse, models.UserResponse{
+			ID:     user.ID,
+			Name:   user.Name,
+			Email:  user.Email,
+			RoleID: user.RoleID,
+			Role:   user.Role,
+		})
+	}
+
+	return c.JSON(usersResponse)
 }
 
 // Get User
@@ -59,16 +70,38 @@ func GetUsers(c *fiber.Ctx) error {
 // @Tags Users
 // @Produce json
 // @Param id path string true "ID"
-// @Success 200 {object} models.UserPayload
+// @Success 200 {object} models.UserResponse
 // @Router /users/{id} [get]
 func GetUser(c *fiber.Ctx) error {
 	id := c.Params("id")
 	db := database.DBConn
 	var user models.User
 	db.Preload("Role").Select("id, name, email, role_id").First(&user, id)
-	return c.JSON(user)
+
+	if user.ID == 0 {
+		return c.Status(404).JSON(models.ErrorResponse{
+			Error: "User not found",
+		})
+	}
+
+	return c.JSON(models.UserResponse{
+		ID:     user.ID,
+		Name:   user.Name,
+		Email:  user.Email,
+		RoleID: user.RoleID,
+		Role:   user.Role,
+	})
 }
 
+// Create User
+// @Summary Create user
+// @Description Create user
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Param user body models.UserPayload true "User"
+// @Success 200 {object} models.UserResponse
+// @Router /users [post]
 func AddUser(c *fiber.Ctx) error {
 	var userPayload models.UserPayload
 	if err := c.BodyParser(&userPayload); err != nil {
@@ -103,7 +136,12 @@ func AddUser(c *fiber.Ctx) error {
 			"error": status.Error.Error(),
 		})
 	}
-	return c.JSON(userPayload)
+	return c.JSON(models.UserResponse{
+		ID:     user.ID,
+		Name:   user.Name,
+		Email:  user.Email,
+		RoleID: user.RoleID,
+	})
 }
 
 // Update User
