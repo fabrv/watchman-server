@@ -134,7 +134,7 @@ func AddRole(c *fiber.Ctx) error {
 // @Produce json
 // @Param id path string true "ID"
 // @Param role body models.RolePayload true "Role"
-// @Success 200 {object} models.Message
+// @Success 200 {object} models.MessageResponse
 // @Router /roles/{id} [put]
 func UpdateRole(c *fiber.Ctx) error {
 	id := c.Params("id")
@@ -169,8 +169,8 @@ func UpdateRole(c *fiber.Ctx) error {
 // @Tags Roles
 // @Produce json
 // @Param id path string true "ID"
-// @Success 200 {object} models.Message
-// @Failure 404 {object} models.Error
+// @Success 200 {object} models.MessageResponse
+// @Failure 404 {object} models.ErrorResponse
 // @Router /roles/{id} [delete]
 func DeleteRole(c *fiber.Ctx) error {
 	id := c.Params("id")

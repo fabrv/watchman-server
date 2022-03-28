@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/fabrv/watchman-server/database"
 	"github.com/fabrv/watchman-server/models"
@@ -9,15 +10,57 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+// Get Users
+// @Summary Get all users
+// @Description Get all users
+// @Tags Users
+// @Produce json
+// @Param limit query number false "Limit"
+// @Param offset query number false "Offset"
+// @Param name query string false "Name"
+// @Param ids query string false "IDs"
+// @Success 200 {array} models.UserPayload
+// @Router /users [get]
 func GetUsers(c *fiber.Ctx) error {
 	db := database.DBConn
 	var users []models.User
+
+	limit := c.Query("limit")
+	offset := c.Query("offset")
+	name := c.Query("name")
+	ids := strings.Split(c.Query("ids"), ",")
+
+	if limit == "" {
+		limit = "10"
+	}
+	if offset == "" {
+		offset = "0"
+	}
+
+	query := db.Limit(limit).Offset(offset)
+
+	if ids[0] != "" {
+		query = query.Where("id IN (?)", ids)
+	}
+
+	if name != "" {
+		query = query.Where("name LIKE ?", "%"+name+"%")
+	}
+
 	// Preload roles and select only id, name, role_id and name
-	db.Preload("Role").Select("id, name, email, role_id").Find(&users)
+	query.Preload("Role").Select("id, name, email, role_id").Find(&users)
 
 	return c.JSON(users)
 }
 
+// Get User
+// @Summary Get user
+// @Description Get user
+// @Tags Users
+// @Produce json
+// @Param id path string true "ID"
+// @Success 200 {object} models.UserPayload
+// @Router /users/{id} [get]
 func GetUser(c *fiber.Ctx) error {
 	id := c.Params("id")
 	db := database.DBConn
@@ -63,6 +106,16 @@ func AddUser(c *fiber.Ctx) error {
 	return c.JSON(userPayload)
 }
 
+// Update User
+// @Summary Update user
+// @Description Update user
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Param id path string true "ID"
+// @Param user body models.UserPayload true "User"
+// @Success 200 {object} models.MessageResponse
+// @Router /users/{id} [put]
 func UpdateUser(c *fiber.Ctx) error {
 	id := c.Params("id")
 	var user models.User
@@ -78,6 +131,15 @@ func UpdateUser(c *fiber.Ctx) error {
 	})
 }
 
+// Delete User
+// @Summary Delete user
+// @Description Delete user
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Param id path string true "ID"
+// @Success 200 {object} models.MessageResponse
+// @Router /users/{id} [delete]
 func DeleteUser(c *fiber.Ctx) error {
 	id := c.Params("id")
 	db := database.DBConn

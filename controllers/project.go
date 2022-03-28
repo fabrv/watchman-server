@@ -127,7 +127,13 @@ func AddProject(c *fiber.Ctx) error {
 			"error": status.Error.Error(),
 		})
 	}
-	return c.JSON(project)
+	return c.JSON(models.ProjectResponse{
+		ID:          projectModel.ID,
+		Name:        projectModel.Name,
+		Description: projectModel.Description,
+		CreatedAt:   projectModel.CreatedAt,
+		UpdatedAt:   projectModel.UpdatedAt,
+	})
 }
 
 // Update Project
@@ -138,7 +144,7 @@ func AddProject(c *fiber.Ctx) error {
 // @Produce json
 // @Param id path string true "ID"
 // @Param project body models.ProjectPayload true "Project"
-// @Success 200 {object} models.ProjectResponse
+// @Success 200 {object} models.MessageResponse
 // @Error 503 {object} models.ErrorResponse
 // @Router /projects/{id} [put]
 func UpdateProject(c *fiber.Ctx) error {
@@ -173,7 +179,7 @@ func UpdateProject(c *fiber.Ctx) error {
 // @Accept json
 // @Produce json
 // @Param id path string true "ID"
-// @Success 200 {object} models.ProjectResponse
+// @Success 200 {object} models.MessageResponse
 // @Error 404 {object} models.ErrorResponse
 // @Router /projects/{id} [delete]
 func DeleteProject(c *fiber.Ctx) error {

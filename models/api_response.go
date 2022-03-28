@@ -1,9 +1,9 @@
 package models
 
-type Message struct {
+type MessageResponse struct {
 	Message string `json:"message"`
 }
 
-type Error struct {
+type ErrorResponse struct {
 	Error string `json:"error"`
 }

@@ -9,6 +9,18 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+// Get Teams
+// @Summary Get all teams
+// @Description Get all teams
+// @Tags Teams
+// @Produce json
+// @Param limit query number false "Limit"
+// @Param offset query number false "Offset"
+// @Param name query string false "Name"
+// @Param ids query string false "IDs"
+// @Success 200 {array} models.TeamResponse
+// @Failure 500 {object} models.ErrorResponse
+// @Router /teams [get]
 func GetTeams(c *fiber.Ctx) error {
 	db := database.DBConn
 
@@ -36,19 +48,63 @@ func GetTeams(c *fiber.Ctx) error {
 	}
 
 	query.Find(&teams)
-	return c.JSON(teams)
+
+	var response []models.TeamResponse
+	for _, team := range teams {
+		response = append(response, models.TeamResponse{
+			ID:          team.ID,
+			Name:        team.Name,
+			Description: team.Description,
+			CreatedAt:   team.CreatedAt,
+			UpdatedAt:   team.UpdatedAt,
+		})
+	}
+
+	return c.JSON(response)
 }
 
+// Get Team
+// @Summary Get team
+// @Description Get team
+// @Tags Teams
+// @Produce json
+// @Param id path string true "Team ID"
+// @Success 200 {object} models.TeamResponse
+// @Failure 404 {object} models.ErrorResponse
+// @Router /teams/{id} [get]
 func GetTeam(c *fiber.Ctx) error {
 	id := c.Params("id")
 	db := database.DBConn
 	var team models.Team
 	db.First(&team, id)
-	return c.JSON(team)
+
+	if team.ID == 0 {
+		return c.Status(fiber.ErrNotFound.Code).JSON(models.ErrorResponse{
+			Error: "Team not found",
+		})
+	}
+
+	return c.JSON(models.TeamResponse{
+		ID:          team.ID,
+		Name:        team.Name,
+		Description: team.Description,
+		CreatedAt:   team.CreatedAt,
+		UpdatedAt:   team.UpdatedAt,
+	})
 }
 
+// Create Team
+// @Summary Create team
+// @Description Create team
+// @Tags Teams
+// @Accept json
+// @Produce json
+// @Param team body models.TeamPayload true "Team"
+// @Success 200 {object} models.TeamResponse
+// @Failure 400 {object} models.ErrorResponse
+// @Router /teams [post]
 func AddTeam(c *fiber.Ctx) error {
-	var team models.Team
+	var team models.TeamPayload
 	if err := c.BodyParser(&team); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": err.Error(),
@@ -62,16 +118,37 @@ func AddTeam(c *fiber.Ctx) error {
 	}
 
 	db := database.DBConn
-	status := db.Create(&team)
+	teamModel := models.Team{
+		Name:        team.Name,
+		Description: team.Description,
+	}
+	status := db.Create(&teamModel)
 
 	if status.Error != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": status.Error.Error(),
 		})
 	}
-	return c.JSON(team)
+	return c.JSON(models.TeamResponse{
+		ID:          teamModel.ID,
+		Name:        teamModel.Name,
+		Description: teamModel.Description,
+		CreatedAt:   teamModel.CreatedAt,
+		UpdatedAt:   teamModel.UpdatedAt,
+	})
 }
 
+// Update Team
+// @Summary Update team
+// @Description Update team
+// @Tags Teams
+// @Accept json
+// @Produce json
+// @Param id path string true "Team ID"
+// @Param team body models.TeamPayload true "Team"
+// @Success 200 {object} models.MessageResponse
+// @Failure 400 {object} models.ErrorResponse
+// @Router /teams/{id} [put]
 func UpdateTeam(c *fiber.Ctx) error {
 	id := c.Params("id")
 	var team models.Team
@@ -87,6 +164,16 @@ func UpdateTeam(c *fiber.Ctx) error {
 	})
 }
 
+// Delete Team
+// @Summary Delete team
+// @Description Delete team
+// @Tags Teams
+// @Accept json
+// @Produce json
+// @Param id path string true "Team ID"
+// @Success 200 {object} models.MessageResponse
+// @Failure 404 {object} models.ErrorResponse
+// @Router /teams/{id} [delete]
 func DeleteTeam(c *fiber.Ctx) error {
 	id := c.Params("id")
 	db := database.DBConn
