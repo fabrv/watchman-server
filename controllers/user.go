@@ -57,7 +57,11 @@ func GetUsers(c *fiber.Ctx) error {
 			Name:   user.Name,
 			Email:  user.Email,
 			RoleID: user.RoleID,
-			Role:   user.Role,
+			Role: models.RoleResponse{
+				ID:          user.Role.ID,
+				Name:        user.Role.Name,
+				Description: user.Role.Description,
+			},
 		})
 	}
 
@@ -89,7 +93,11 @@ func GetUser(c *fiber.Ctx) error {
 		Name:   user.Name,
 		Email:  user.Email,
 		RoleID: user.RoleID,
-		Role:   user.Role,
+		Role: models.RoleResponse{
+			ID:          user.Role.ID,
+			Name:        user.Role.Name,
+			Description: user.Role.Description,
+		},
 	})
 }
 

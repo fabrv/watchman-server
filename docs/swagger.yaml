@@ -182,6 +182,23 @@ definitions:
     - password
     - role_id
     type: object
+  models.UserResponse:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      role:
+        $ref: '#/definitions/models.RoleResponse'
+      role_id:
+        type: integer
+      updated_at:
+        type: string
+    type: object
 info:
   contact: {}
 paths:
@@ -791,6 +808,31 @@ paths:
       summary: Update a TimeLog
       tags:
       - TimeLog
+  /time-logs/{id}/finish:
+    post:
+      consumes:
+      - application/json
+      description: Sets the end time of a TimeLog to the current time
+      parameters:
+      - description: TimeLog ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.MessageResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Finish a TimeLog
+      tags:
+      - TimeLog
   /users:
     get:
       description: Get all users
@@ -821,6 +863,27 @@ paths:
               $ref: '#/definitions/models.UserPayload'
             type: array
       summary: Get all users
+      tags:
+      - Users
+    post:
+      consumes:
+      - application/json
+      description: Create user
+      parameters:
+      - description: User
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserPayload'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.UserResponse'
+      summary: Create user
       tags:
       - Users
   /users/{id}:
@@ -858,7 +921,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.UserPayload'
+            $ref: '#/definitions/models.UserResponse'
       summary: Get user
       tags:
       - Users
