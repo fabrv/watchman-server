@@ -1366,6 +1366,9 @@ const docTemplate = `{
                 "end_time": {
                     "type": "string"
                 },
+                "finished": {
+                    "type": "boolean"
+                },
                 "id": {
                     "type": "integer"
                 },

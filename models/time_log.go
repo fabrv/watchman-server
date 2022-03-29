@@ -11,7 +11,8 @@ type TimeLogPayload struct {
 	ProjectID   uint      `json:"project_id" validate:"required"`
 	TeamID      uint      `json:"team_id" validate:"required"`
 	LogTypeID   uint      `json:"log_type_id" validate:"required"`
-	StartTime   time.Time `json:"start_time" validate:"required"`
+	StartTime   time.Time `json:"start_time"`
+	EndTime     time.Time `json:"end_time"`
 	Description string    `json:"description" validate:"min=0,max=255"`
 }
 
@@ -38,4 +39,5 @@ type TimeLogResponse struct {
 	StartTime   time.Time `json:"start_time"`
 	EndTime     time.Time `json:"end_time"`
 	Description string    `json:"description"`
+	Finished    bool      `json:"finished"`
 }

@@ -147,6 +147,8 @@ definitions:
         type: string
       end_time:
         type: string
+      finished:
+        type: boolean
       id:
         type: integer
       log_type_id:

@@ -44,7 +44,17 @@ func GetLogTypes(c *fiber.Ctx) error {
 	}
 
 	query.Find(&logTypes)
-	return c.JSON(logTypes)
+
+	var logTypesResponse []models.LogTypeResponse
+	for _, logType := range logTypes {
+		logTypesResponse = append(logTypesResponse, models.LogTypeResponse{
+			ID:          logType.ID,
+			Name:        logType.Name,
+			Description: logType.Description,
+		})
+	}
+
+	return c.JSON(logTypesResponse)
 }
 
 // GetLogType

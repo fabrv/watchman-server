@@ -53,6 +53,7 @@ func GetTimeLogs(c *fiber.Ctx) error {
 			StartTime:   timeLog.StartTime,
 			EndTime:     timeLog.EndTime,
 			Description: timeLog.Description,
+			Finished:    !timeLog.EndTime.IsZero(),
 		})
 	}
 
@@ -106,7 +107,7 @@ func AddTimeLog(c *fiber.Ctx) error {
 		ProjectID:   timeLogPayload.ProjectID,
 		TeamID:      timeLogPayload.TeamID,
 		LogTypeID:   timeLogPayload.LogTypeID,
-		StartTime:   timeLogPayload.StartTime,
+		StartTime:   time.Now(),
 		Description: timeLogPayload.Description,
 	}
 
@@ -118,7 +119,17 @@ func AddTimeLog(c *fiber.Ctx) error {
 			"error": status.Error.Error(),
 		})
 	}
-	return c.JSON(timeLogPayload)
+	return c.JSON(models.TimeLogResponse{
+		ID:          timeLog.ID,
+		UserId:      timeLog.UserID,
+		LogTypeId:   timeLog.LogTypeID,
+		ProjectId:   timeLog.ProjectID,
+		TeamId:      timeLog.TeamID,
+		StartTime:   timeLog.StartTime,
+		EndTime:     timeLog.EndTime,
+		Description: timeLog.Description,
+		Finished:    !timeLog.EndTime.IsZero(),
+	})
 }
 
 // UpdateTimeLog updates a TimeLog
