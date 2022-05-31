@@ -25,6 +25,10 @@ func GetTimeLogs(c *fiber.Ctx) error {
 
 	limit := c.Query("limit")
 	offset := c.Query("offset")
+
+	from := c.Query("from")
+	to := c.Query("to")
+
 	userIds := strings.Split(c.Query("user_ids"), ",")
 
 	if limit == "" {
@@ -34,7 +38,11 @@ func GetTimeLogs(c *fiber.Ctx) error {
 		offset = "0"
 	}
 
-	query := db.Limit(limit).Offset(offset)
+	query := db.Order("start_time desc").Limit(limit).Offset(offset)
+
+	if from != "" && to != "" {
+		query = query.Where("start_time >= ? AND start_time <= ?", from, to)
+	}
 
 	if userIds[0] != "" {
 		query = query.Where("user_id IN (?)", userIds)
@@ -55,6 +63,10 @@ func GetTimeLogs(c *fiber.Ctx) error {
 			Description: timeLog.Description,
 			Finished:    !timeLog.EndTime.IsZero(),
 		})
+	}
+
+	if len(timeLogsResponse) == 0 {
+		timeLogsResponse = []models.TimeLogResponse{}
 	}
 
 	return c.JSON(timeLogsResponse)
@@ -112,6 +124,12 @@ func AddTimeLog(c *fiber.Ctx) error {
 	}
 
 	db := database.DBConn
+
+	var openTimeLog models.TimeLog
+	db.Model(&openTimeLog).Where("user_id = ? AND end_time IS NULL", timeLog.UserID).First(&openTimeLog)
+	openTimeLog.EndTime = time.Now()
+	db.Save(&openTimeLog)
+
 	status := db.Create(&timeLog)
 
 	if status.Error != nil {
@@ -119,6 +137,7 @@ func AddTimeLog(c *fiber.Ctx) error {
 			"error": status.Error.Error(),
 		})
 	}
+
 	return c.JSON(models.TimeLogResponse{
 		ID:          timeLog.ID,
 		UserId:      timeLog.UserID,

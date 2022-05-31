@@ -29,6 +29,7 @@ func GetUsers(c *fiber.Ctx) error {
 	offset := c.Query("offset")
 	name := c.Query("name")
 	ids := strings.Split(c.Query("ids"), ",")
+	roleIds := strings.Split(c.Query("role_ids"), ",")
 
 	if limit == "" {
 		limit = "10"
@@ -37,18 +38,22 @@ func GetUsers(c *fiber.Ctx) error {
 		offset = "0"
 	}
 
-	query := db.Limit(limit).Offset(offset)
+	query := db.Order("id DESC").Limit(limit).Offset(offset)
 
 	if ids[0] != "" {
 		query = query.Where("id IN (?)", ids)
 	}
 
+	if roleIds[0] != "" {
+		query = query.Where("role_id IN (?)", roleIds)
+	}
+
 	if name != "" {
-		query = query.Where("name LIKE ?", "%"+name+"%")
+		query = query.Where("name LIKE ? OR email LIKE ?", "%"+name+"%", "%"+name+"%")
 	}
 
 	// Preload roles and select only id, name, role_id and name
-	query.Preload("Role").Select("id, name, email, role_id").Find(&users)
+	query.Preload("Role").Find(&users)
 
 	var usersResponse []models.UserResponse
 	for _, user := range users {
@@ -62,6 +67,8 @@ func GetUsers(c *fiber.Ctx) error {
 				Name:        user.Role.Name,
 				Description: user.Role.Description,
 			},
+			CreatedAt: user.CreatedAt,
+			UpdatedAt: user.UpdatedAt,
 		})
 	}
 
@@ -181,6 +188,7 @@ func UpdateUser(c *fiber.Ctx) error {
 		Name:     user.Name,
 		Email:    user.Email,
 		Password: user.Password,
+		RoleID:   user.RoleID,
 	}
 
 	db.Model(&userModel).Where("id = ?", id).Updates(userModel)

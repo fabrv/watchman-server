@@ -2,14 +2,19 @@ package routes
 
 import (
 	"github.com/fabrv/watchman-server/controllers"
+	"github.com/fabrv/watchman-server/middlewares"
 	"github.com/gofiber/fiber/v2"
 )
 
 func SetupRoutes(app *fiber.App) {
 	var baseRoute = "/api/v1"
 
+	// Session routes
+	app.Post(baseRoute+"/session", controllers.CreateSession)
+	app.Delete(baseRoute+"/session", controllers.DeleteSession)
+
 	// Roles routes
-	app.Get(baseRoute+"/roles", controllers.GetRoles)
+	app.Get(baseRoute+"/roles", middlewares.Auth(), controllers.GetRoles)
 	app.Get(baseRoute+"/roles/:id", controllers.GetRole)
 	app.Post(baseRoute+"/roles", controllers.AddRole)
 	app.Put(baseRoute+"/roles/:id", controllers.UpdateRole)
